@@ -2,8 +2,8 @@
 
 int main(void) {
 
-    Application* app = Application::GetInstance();
-    app->Run();
+	Application* app = Application::GetInstance();
+	app->Run();
 
-    return 0;
+	return 0;
 }

@@ -30,7 +30,7 @@ private:
 	SDL_Window* window_ = nullptr;
 	SDL_Surface* surface_ = nullptr;
 	/* RealSense SDK 2.0 specific objects */
-    rs2::config* config_ = nullptr;
+	rs2::config* config_ = nullptr;
 	rs2::pipeline* pipeline_ = nullptr;
 	rs2::frameset* frameset_ = nullptr;
 };

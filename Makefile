@@ -14,8 +14,8 @@ all: $(TARGET)
 
 ${TARGET}:
 	$(CXX) $(CXXFLAGS) $(DIRECTORIES) $(SRCS) -o $(TARGET) $(LIB_FLAGS)
-	rm -r ./build/
-	mkdir build
+	rm -r ${build_dir}
+	mkdir ${build_dir}
 	mv $(TARGET) ${build_dir}
 
 clean:

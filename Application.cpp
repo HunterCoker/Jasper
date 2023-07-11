@@ -27,8 +27,8 @@ bool Application::Init() {
     pipeline_->start(*config_);
 
 	frameset_ = new rs2::frameset();
-    *frameset_ = pipeline_->wait_for_frames(3000);
-    rs2::depth_frame init_depth_frame = frameset_->first(RS2_STREAM_DEPTH);
+	*frameset_ = pipeline_->wait_for_frames(3000);
+	rs2::depth_frame init_depth_frame = frameset_->first(RS2_STREAM_DEPTH);
 
 	if (SDL_Init(SDL_INIT_EVENTS) < 0) {
 		SDL_Log("error: failed to initialize SDL: %s", SDL_GetError());
