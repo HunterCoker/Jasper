@@ -1,0 +1,21 @@
+#pragma once
+
+namespace jasp {
+
+	struct stream {
+		stream();
+		stream(const stream& other);
+		~stream();
+
+		static void create_depth_stream(stream& s);
+		static void create_color_stream(stream& s);
+		static void create_threshold_stream(stream& s);
+
+		int width;
+		int height;
+		int stride;
+		void* data;
+		unsigned int* pixel_data;
+	};
+
+}
