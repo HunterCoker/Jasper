@@ -6,7 +6,7 @@ Application::Application() {
 		std::exit(-1);
 	}
 	jasp::context ctx;
-	ctx.config_flags = JASP_STREAM_COLOR | JASP_STREAM_DEPTH;
+	ctx.config_flags = JASP_STREAM_COLOR | JASP_STREAM_THRESHOLD;
 	jasp::make_context_current(ctx);
 
 	// Setup SDL
@@ -17,7 +17,7 @@ Application::Application() {
 
 	// Create SDL_Window with SDL_Renderer graphics context
 	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-	window_ = SDL_CreateWindow("Jasper-GUI", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+	window_ = SDL_CreateWindow("Jasper-GUI", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 900, 720, window_flags);
 	renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
 	if (renderer_ == nullptr) {
 		SDL_Log("Error creating SDL_Renderer!");
@@ -126,7 +126,6 @@ void Application::Run() {
 				// ImGui::SetCursorPos(local_pos);
 				// ImGui::Image((ImTextureID)(intptr_t)textures_[i], image_size);
 				ImGui::Image((ImTextureID)(intptr_t)textures_[i], image_size);
-
 			}
 
 			ImGui::End();

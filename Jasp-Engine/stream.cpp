@@ -58,5 +58,5 @@ namespace jasp {
 		s.stride = 1;
 		s.data = new uint8_t[s.width * s.height * s.stride];
 	}
-
+	
 }

@@ -18,4 +18,16 @@ namespace jasp {
 		unsigned int* pixel_data;
 	};
 
+
+	// struct threshold_stream : private stream {
+	// 	threshold_stream();
+	// 	threshold_stream(const threshold_stream& other);
+	// 	~threshold_stream();
+		
+	// 	// inline void set_threshold_value(float threshold);
+	// 	inline bool threshold_pixel(int x, int y);
+	// private:
+	// 	float threshold;
+	// };
+
 }
