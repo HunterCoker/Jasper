@@ -1,0 +1,4 @@
+[submodule "Jasper-GUI/vendor/imgui"]
+	path = Jasper-GUI/vendor/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking

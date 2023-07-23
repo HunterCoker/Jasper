@@ -9,7 +9,7 @@ BUILD_DIR = ./build/
 
 TARGET := objdetectionv1
 
-IMGUI_DIR = ../../dependencies/imgui-docking/
+IMGUI_DIR = ./vendor/imgui/
 IMGUI_SRC = $(IMGUI_DIR)imgui.cpp $(IMGUI_DIR)imgui_draw.cpp $(IMGUI_DIR)imgui_tables.cpp $(IMGUI_DIR)imgui_widgets.cpp $(IMGUI_DIR)backends/imgui_impl_sdl2.cpp $(IMGUI_DIR)backends/imgui_impl_sdlrenderer2.cpp
 
 JASP_DIR = ../Jasp-Engine/

@@ -42,8 +42,6 @@ namespace jasp {
 		 * 
 		 */
 		
-
-		// WORKS!!!
 		for (int y = 0; y < height; ++y) {
 			int sum = 0;
 			for (int x = 0; x < width; ++x) {
@@ -62,9 +60,8 @@ namespace jasp {
 				sum += intensity;
 				if (y == 0)
 					sum_table[y * width + x] = sum;
-				else {
+				else
 					sum_table[y * width + x] = sum + sum_table[(y - 1) * width + x];
-				}
 
 			}
 		}
@@ -75,7 +72,6 @@ namespace jasp {
 		float t = 0.35;
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
-				
 				// defines the bounds for a window of the grayscale image
 				int x1 = x - s / 2; x1 = x1 < 0 ? 0 : x1;
 				int x2 = x + s / 2; x2 = x2 > width - 1 ? width - 1 : x2;
