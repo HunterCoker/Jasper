@@ -10,19 +10,28 @@ Application::Application() {
 	jasp::make_context_current(ctx);
 
 	// Setup SDL
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
-		printf("Error: %s\n", SDL_GetError());
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
+        printf("Error: SDL_Init(): %s\n", SDL_GetError());
 		std::exit(-1);
-	}
+    }
+
+	// Enable native IME.
+    SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
 	// Create SDL_Window with SDL_Renderer graphics context
-	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-	window_ = SDL_CreateWindow("Jasper-GUI", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 900, 720, window_flags);
-	renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer_ == nullptr) {
-		SDL_Log("Error creating SDL_Renderer!");
-		std::exit(-1);
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
+    window_ = SDL_CreateWindow("Jasper GUI", 1280, 720, window_flags);
+    if (window_ == nullptr) {
+        printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
+        std::exit(-1);
+    }
+    renderer_ = SDL_CreateRenderer(window_, NULL, SDL_RENDERER_ACCELERATED);
+    if (renderer_ == nullptr) {
+        SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
+        std::exit(-1);
 	}
+	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    SDL_ShowWindow(window_);
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -32,8 +41,8 @@ Application::Application() {
 	ImGui::StyleColorsDark();
 
 	// Setup Platform/Renderer backends
-	ImGui_ImplSDL2_InitForSDLRenderer(window_, renderer_);
-	ImGui_ImplSDLRenderer2_Init(renderer_);
+    ImGui_ImplSDL3_InitForSDLRenderer(window_, renderer_);
+    ImGui_ImplSDLRenderer3_Init(renderer_);
 }
 
 void Application::Run() {
@@ -60,18 +69,16 @@ void Application::Run() {
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			ImGui_ImplSDL2_ProcessEvent(&event);
-			if (event.type == SDL_QUIT)
-				running = false;
-			if (event.type == SDL_WINDOWEVENT &&
-				event.window.event == SDL_WINDOWEVENT_CLOSE &&
-				event.window.windowID == SDL_GetWindowID(window_))
-				running = false;
+            ImGui_ImplSDL3_ProcessEvent(&event);
+            if (event.type == SDL_EVENT_QUIT)
+                running = false;
+            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window_))
+                running = false;
 		}
 
 		// Start the Dear ImGui frame
-		ImGui_ImplSDLRenderer2_NewFrame();
-		ImGui_ImplSDL2_NewFrame();
+		ImGui_ImplSDLRenderer3_NewFrame();
+		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
 
 		// Start a new Jasp Engine iteration
@@ -131,24 +138,25 @@ void Application::Run() {
 			ImGui::End();
 		}
 
-		// Rendering
-		ImGui::Render();
-		SDL_RenderSetScale(renderer_, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+
+        // Rendering
+        ImGui::Render();
+        //SDL_RenderSetScale(rende	rer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
 		SDL_SetRenderDrawColor(renderer_, 0x73, 0x8c, 0x99, 0xff);
-		SDL_RenderClear(renderer_);
-		ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
-		SDL_RenderPresent(renderer_);
+        SDL_RenderClear(renderer_);
+        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
+        SDL_RenderPresent(renderer_);
 	}
 }
 
 Application::~Application() {
 	jasp::shutdown();
 
-    ImGui_ImplSDLRenderer2_Shutdown();
-	ImGui_ImplSDL2_Shutdown();
-	ImGui::DestroyContext();
+    ImGui_ImplSDLRenderer3_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
 
-	SDL_DestroyRenderer(renderer_);
-	SDL_DestroyWindow(window_);
-	SDL_Quit();
+    SDL_DestroyRenderer(renderer_);
+    SDL_DestroyWindow(window_);
+    SDL_Quit();
 }

@@ -62,7 +62,6 @@ namespace jasp {
 					sum_table[y * width + x] = sum;
 				else
 					sum_table[y * width + x] = sum + sum_table[(y - 1) * width + x];
-
 			}
 		}
 
