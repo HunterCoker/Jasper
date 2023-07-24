@@ -6,7 +6,7 @@ Application::Application() {
 		std::exit(-1);
 	}
 	jasp::context ctx;
-	ctx.config_flags = JASP_STREAM_COLOR | JASP_STREAM_THRESHOLD;
+	ctx.config_flags = JASP_STREAM_THRESHOLD;
 	jasp::make_context_current(ctx);
 
 	// Setup SDL

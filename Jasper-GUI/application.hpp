@@ -17,7 +17,7 @@ public:
 	Application();
 	Application(const Application&) = delete;
 	~Application();
-
+	
 	void Run();
 private:
 	SDL_Window* window_;
