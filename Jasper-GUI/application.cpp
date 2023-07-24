@@ -1,5 +1,7 @@
 #include "application.hpp"
 
+#include <imgui_internal.h>
+
 Application::Application() {
 	// Setup Jasp Engine with context
 	if (!jasp::init()) {
@@ -11,38 +13,38 @@ Application::Application() {
 
 	// Setup SDL
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
-        printf("Error: SDL_Init(): %s\n", SDL_GetError());
+		printf("Error: SDL_Init(): %s\n", SDL_GetError());
 		std::exit(-1);
-    }
+	}
 
 	// Enable native IME.
-    SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
 	// Create SDL_Window with SDL_Renderer graphics context
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
-    window_ = SDL_CreateWindow("Jasper GUI", 1280, 720, window_flags);
-    if (window_ == nullptr) {
-        printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
-        std::exit(-1);
-    }
-    renderer_ = SDL_CreateRenderer(window_, NULL, SDL_RENDERER_ACCELERATED);
-    if (renderer_ == nullptr) {
-        SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
-        std::exit(-1);
+	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
+	window_ = SDL_CreateWindow("Jasper GUI", 1280, 720, window_flags);
+	if (window_ == nullptr) {
+		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
+		std::exit(-1);
+	}
+	renderer_ = SDL_CreateRenderer(window_, NULL, SDL_RENDERER_ACCELERATED);
+	if (renderer_ == nullptr) {
+		SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
+		std::exit(-1);
 	}
 	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    SDL_ShowWindow(window_);
+	SDL_ShowWindow(window_);
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	// Setup Dear ImGui style
+	// Setup Dear ImGui style and Dockspace
 	ImGui::StyleColorsDark();
 
 	// Setup Platform/Renderer backends
-    ImGui_ImplSDL3_InitForSDLRenderer(window_, renderer_);
-    ImGui_ImplSDLRenderer3_Init(renderer_);
+	ImGui_ImplSDL3_InitForSDLRenderer(window_, renderer_);
+	ImGui_ImplSDLRenderer3_Init(renderer_);
 }
 
 void Application::Run() {
@@ -69,11 +71,11 @@ void Application::Run() {
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-            ImGui_ImplSDL3_ProcessEvent(&event);
-            if (event.type == SDL_EVENT_QUIT)
-                running = false;
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window_))
-                running = false;
+			ImGui_ImplSDL3_ProcessEvent(&event);
+			if (event.type == SDL_EVENT_QUIT)
+				running = false;
+			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window_))
+				running = false;
 		}
 
 		// Start the Dear ImGui frame
@@ -81,13 +83,26 @@ void Application::Run() {
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
 
+		static bool init_dockspace = false;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(viewport);
+
+		if (!init_dockspace) {
+			ImGui::DockBuilderRemoveNode(dockspace_id);
+			ImGui::DockBuilderAddNode(dockspace_id);
+			
+			ImGuiID dockspace_id_left, dockspace_id_right;
+			ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.3f, &dockspace_id_left, &dockspace_id_right);
+			ImGui::DockBuilderDockWindow("Debug", dockspace_id_left);
+			ImGui::DockBuilderDockWindow("Viewport", dockspace_id_right);
+
+			ImGui::DockBuilderFinish(dockspace_id);
+			init_dockspace = true;
+		}
+
 		// Start a new Jasp Engine iteration
 		bool itr = jasp::start();
-
-		// 1. Create dockspace
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::DockSpaceOverViewport(viewport);
-
+		
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoBackground | ImGuiDockNodeFlags_PassthruCentralNode |
 			ImGuiWindowFlags_NoMove;
@@ -121,6 +136,7 @@ void Application::Run() {
 
 			ImVec2 window_size = ImGui::GetWindowSize();
 			for (std::size_t i = 0; i < streams.size(); ++i) {
+
 				auto stream = streams[i];
 				if (itr && !paused) {
 					SDL_UpdateTexture(textures_[i], nullptr, stream->pixel_data, 4 * stream->width);
@@ -138,25 +154,24 @@ void Application::Run() {
 			ImGui::End();
 		}
 
-
-        // Rendering
-        ImGui::Render();
-        //SDL_RenderSetScale(rende	rer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+		// Rendering
+		ImGui::Render();
+		//SDL_RenderSetScale(rende	rer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
 		SDL_SetRenderDrawColor(renderer_, 0x73, 0x8c, 0x99, 0xff);
-        SDL_RenderClear(renderer_);
-        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
-        SDL_RenderPresent(renderer_);
+		SDL_RenderClear(renderer_);
+		ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
+		SDL_RenderPresent(renderer_);
 	}
 }
 
 Application::~Application() {
 	jasp::shutdown();
 
-    ImGui_ImplSDLRenderer3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
+	ImGui_ImplSDLRenderer3_Shutdown();
+	ImGui_ImplSDL3_Shutdown();
+	ImGui::DestroyContext();
 
-    SDL_DestroyRenderer(renderer_);
-    SDL_DestroyWindow(window_);
-    SDL_Quit();
+	SDL_DestroyRenderer(renderer_);
+	SDL_DestroyWindow(window_);
+	SDL_Quit();
 }
