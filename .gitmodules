@@ -2,3 +2,6 @@
 	path = Jasper-GUI/vendor/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "Jasper-GUI/vendor/SDL"]
+	path = Jasper-GUI/vendor/SDL
+	url = git@github.com:libsdl-org/SDL.git
