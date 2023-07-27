@@ -8,12 +8,18 @@
 namespace jasp {
 
 	struct context {
-		unsigned int config_flags;
+		context() {
+			config_flags = 0;
+			threshold = 0.483f;
+		}
+
 		std::vector<stream*> streams;
 		std::vector<target*> targets;
+		unsigned int config_flags;
+		float threshold;
 	};
 
 	void make_context_current(const context& ctx);
-	const context& get_current_context();
+	context* get_current_context();
 
 }

@@ -1,6 +1,10 @@
 #include "util.hpp"
 #include "jasp_internal.hpp"
 
+// TEMPORARY -- STREAM TEMPLATE IMAGE BYTE DATA TO FILE AND READ THAT INSTEAD
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
 #include <iostream>
 
 namespace jasp {
@@ -65,10 +69,10 @@ namespace jasp {
 			}
 		}
 
+		/* image segmentation */
 		// adpatively thresholds each pixel by comparing it to an average of the surrounding pixels
 		// source: https://people.scs.carleton.ca/~roth/iit-publications-iti/docs/gerh-50002.pdf
 		uint32_t s = width / 8;
-		float t = 0.35;
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
 				// defines the bounds for a window of the grayscale image
@@ -88,13 +92,14 @@ namespace jasp {
 
 				// the pixel at (x,y) must be at least (1 - t) percent of the average intensity to be white
 				uint8_t* thresh_data = static_cast<uint8_t*>(internal::threshold.data) + (y * width + x) * internal::threshold.stride;
-				*thresh_data = *thresh_data < avg * (1.0f - t) ? 0x00 : 0xff;
+				*thresh_data = *thresh_data < avg * (1.0f - internal::ctx.threshold) ? 0x00 : 0xff;
 			}
 		}
 
 		delete[] sum_table;
 
-		/* detecting objects */
+		/* detecting objects with template matching */
+
 
 
 		/* configuration related */
@@ -118,8 +123,6 @@ namespace jasp {
 			internal::depth.pixel_data = pixel_data;
 		}
 	
-	
-	
 		if (internal::ctx.config_flags & JASP_STREAM_COLOR) {
 			int width = internal::color.width;
 			int height = internal::color.height;
@@ -133,6 +136,21 @@ namespace jasp {
 					uint8_t b = color[2];
 					pixel_data[y * width + x] = 0xff000000 | (b << 16) | (g << 8) | (r << 0);
 				}
+			}
+
+			for (const auto& target : internal::ctx.targets) {
+				auto bounding_box = target->bbox;
+				
+				for (int x = bounding_box.x; x < bounding_box.x + bounding_box.w; ++x) {
+					pixel_data[bounding_box.y * width + x] = 0xff00ffff;
+					pixel_data[(bounding_box.y + bounding_box.h) * width + x] = 0xff00ffff;
+				}
+
+				for (int y = bounding_box.y; y < bounding_box.y + bounding_box.h; ++y) {
+					pixel_data[y * width + bounding_box.x] = 0xff00ffff;
+					pixel_data[y * width + bounding_box.x + bounding_box.w] = 0xff00ffff;
+				}
+
 			}
 
 			if (internal::color.pixel_data)

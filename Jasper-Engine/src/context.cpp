@@ -28,11 +28,12 @@ namespace jasp {
 			internal::ctx.streams.push_back(&internal::threshold);
 		}
 		
-		// create thread for managing internal streams & detecting targets
+		// create thread for managing internal streams & detecting targets	
+		
 	}
 
-	const context& get_current_context() {
-		return internal::ctx;
+	context* get_current_context() {
+		return &internal::ctx;
 	}
 
 }

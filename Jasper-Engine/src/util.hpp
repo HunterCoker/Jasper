@@ -9,11 +9,6 @@ enum config_flags {
 
 namespace jasp {
 
-	struct rectbb {
-		int x, y;
-		int w, h;
-	};
-
 	typedef struct {
 		int x, y;
 	} point, vec2;

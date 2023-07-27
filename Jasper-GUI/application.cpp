@@ -8,7 +8,7 @@ Application::Application() {
 		std::exit(-1);
 	}
 	jasp::context ctx;
-	ctx.config_flags = JASP_STREAM_THRESHOLD;
+	ctx.config_flags = JASP_STREAM_COLOR | JASP_STREAM_THRESHOLD;
 	jasp::make_context_current(ctx);
 
 	// Setup SDL
@@ -53,12 +53,12 @@ void Application::Run() {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
 
-	const jasp::context ctx = jasp::get_current_context();
+	jasp::context* ctx = jasp::get_current_context();
 
 	// Create SDL_Textures that correspond to each stream created by the given context
-	textures_.resize(ctx.streams.size());
+	textures_.resize(ctx->streams.size());
 	for (std::size_t i = 0; i < textures_.size(); ++i) {
-		auto stream = ctx.streams[i];
+		auto stream = ctx->streams[i];
 		textures_[i] = SDL_CreateTexture(renderer_,
 			SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING,
 			stream->width, stream->height);
@@ -111,8 +111,8 @@ void Application::Run() {
 		static bool paused = false;
 		{
 			ImGui::Begin("Debug", nullptr, window_flags);
-			ImGui::Text("Image information:");
 
+			ImGui::Text("General");
 			if (ImGui::Button("Pause")) {
 				if (paused) {
 					paused = false;
@@ -122,8 +122,20 @@ void Application::Run() {
 				}
 			}
 
-			ImGui::NewLine();
+			if (ImGui::Button("Capture")) {
+				for (std::size_t i = 0; i < ctx->streams.size(); ++i) {
+					jasp::stream* stream = ctx->streams[i];
+
+					// capture each stream's pixel data as a png with appropriate filenames
+					// stbi_write_png("...", stream->width, stream->height, 4, stream->pixel_data, 4 * stream->width);
+				}
+			}
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+
+			ImGui::NewLine();
+			ImGui::Text("Stream");
+			ImGui::SliderFloat("threshold", &ctx->threshold, 0.0f, 1.0f, "%.3f", 0);
+
 			ImGui::End();
 		}
 
@@ -131,7 +143,7 @@ void Application::Run() {
 		{
 			ImGui::Begin("Viewport", nullptr, window_flags);
 			
-			auto streams = ctx.streams;
+			auto streams = ctx->streams;
 			// auto targets = ctx->targets;
 
 			ImVec2 window_size = ImGui::GetWindowSize();
