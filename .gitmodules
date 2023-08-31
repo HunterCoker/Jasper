@@ -5,3 +5,6 @@
 [submodule "Jasper-GUI/vendor/SDL"]
 	path = Jasper-GUI/vendor/SDL
 	url = git@github.com:libsdl-org/SDL.git
+[submodule "Jasper-Engine/vendor/librealsense"]
+	path = Jasper-Engine/vendor/librealsense
+	url = git@github.com:IntelRealSense/librealsense.git

@@ -7,14 +7,15 @@ enum config_flags {
 	JASP_STREAM_THRESHOLD	= 0x4
 };
 
-namespace jasp {
+namespace Jasp {
 
-	typedef struct {
+	struct Vec2 {
 		int x, y;
-	} point, vec2;
+	};
 
-	int init();
-	bool start();
-	void shutdown();
+	struct Rect {
+		int x, y;
+		int w, h;
+	};
 
 }
